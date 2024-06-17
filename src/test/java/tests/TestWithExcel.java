@@ -9,13 +9,14 @@ import org.testng.annotations.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 
 
 public class TestWithExcel extends BaseTest {
 
     @Test(dataProvider = "getData", retryAnalyzer = Retry.class)
-    public void maintest(String input) {
+    public void maintest(String input) throws MalformedURLException {
         landingPage.testUrl(input);
     }
 

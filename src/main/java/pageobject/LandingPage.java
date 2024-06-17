@@ -7,6 +7,9 @@ import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import reuseable.AbstractClass;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class LandingPage extends AbstractClass {
     WebDriver driver ;
     public LandingPage(WebDriver driver){
@@ -17,7 +20,7 @@ public class LandingPage extends AbstractClass {
     public void goTOLandingPage(){
         driver.get("http://nivontec.de/");
     }
-    public  void testUrl(String data){
+    public  void testUrl(String data) throws MalformedURLException {
         driver.get(data);
         WebElement body = driver.findElement(By.tagName("body"));
 
