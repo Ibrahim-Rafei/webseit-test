@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class TestWithExcel extends BaseTest {
 
     @Test(dataProvider = "getData", retryAnalyzer = Retry.class)
-    public void maintest(String input) throws MalformedURLException {
+    public void maintest(String input) throws IOException {
         landingPage.testUrl(input);
     }
 

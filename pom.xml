@@ -20,6 +20,12 @@
             <artifactId>selenium-java</artifactId>
             <version>4.21.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.dmfs/httpurlconnection-executor -->
+        <dependency>
+            <groupId>org.dmfs</groupId>
+            <artifactId>httpurlconnection-executor</artifactId>
+            <version>0.8</version>
+        </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
