@@ -24,10 +24,10 @@ public class LandingPage extends AbstractClass {
         driver.get(data);
         WebElement body = driver.findElement(By.tagName("body"));
 
-        // Check the page title or any other element to determine if the page loaded correctly
-        Assert.assertFalse(driver.getTitle().contains("404") || body.getText().contains("404"), data + " is returning a 404 error.");
 
-        System.out.println(driver.getCurrentUrl());
+        // Check the page title or any other element to determine if the page loaded correctly
+        Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error.");
+
         Assert.assertFalse(!driver.getCurrentUrl().startsWith("https"), data + "is not SSL Certified");
 
 
