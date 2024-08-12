@@ -35,11 +35,11 @@ public class LandingPage extends AbstractClass {
         int responseCode = connection.getResponseCode();
         System.out.println(responseCode);
         if (responseCode == 200) {
-            Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error.");
-            System.out.println(data + "is working. Status code: " + responseCode);
+            Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error." + "\n");
+            System.out.println(data + "is working. Status code: " + responseCode + "\n");
 
         } else {
-            Assert.fail(data + " is not working. Status code: " + responseCode);
+            Assert.fail(data + " is not working. Status code: " + responseCode + "\n");
         }
         // Check the page title or any other element to determine if the page loaded correctly
 
