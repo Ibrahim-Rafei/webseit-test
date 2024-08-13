@@ -35,7 +35,7 @@ public class LandingPage extends AbstractClass {
         int responseCode = connection.getResponseCode();
         if (responseCode == 200) {
             Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error." + "\n");
-            System.out.println(data + "is working. Status code: " + responseCode + "\n");
+            System.out.println(data + " is working. Status code: " + responseCode);
 
         } else {
             Assert.fail(data + " is not working. Status code: " + responseCode + "\n");
