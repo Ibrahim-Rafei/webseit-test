@@ -33,7 +33,6 @@ public class LandingPage extends AbstractClass {
         connection.setRequestMethod("GET");
         connection.connect();
         int responseCode = connection.getResponseCode();
-        System.out.println(responseCode);
         if (responseCode == 200) {
             Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error." + "\n");
             System.out.println(data + "is working. Status code: " + responseCode + "\n");
