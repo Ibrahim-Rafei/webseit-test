@@ -33,6 +33,8 @@ public class LandingPage extends AbstractClass {
             // Attempt to open HTTP connection
             HttpURLConnection connection = (HttpURLConnection) siteURL.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(10000); // 10 seconds
+            connection.setReadTimeout(10000); // 10 seconds
             connection.connect();
 
         int responseCode = connection.getResponseCode();
