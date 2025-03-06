@@ -42,6 +42,7 @@ public class BaseTest {
             options.addArguments("--headless");
             // Disable GPU to prevent issues in headless mode
             options.addArguments("--disable-gpu");
+            options.addArguments("--disable-dev-shm-usage"); // Fix for low memory issues in Docker
             options.addArguments("--no-sandbox");  // Important for Docker
             options.setBinary("/usr/bin/google-chrome-stable");  // Set the correct path here
 
