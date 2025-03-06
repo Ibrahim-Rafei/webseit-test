@@ -40,9 +40,10 @@ public class BaseTest {
             ChromeOptions options = new ChromeOptions();
             // Add headless mode argument
             options.addArguments("--headless");
-
             // Disable GPU to prevent issues in headless mode
             options.addArguments("--disable-gpu");
+            options.addArguments("--no-sandbox");  // Important for Docker
+            options.setBinary("/usr/bin/google-chrome-stable");  // Set the correct path here
 
             driver = new ChromeDriver(options);
         } else if (browserName.equalsIgnoreCase("firefox")) {
