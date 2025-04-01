@@ -39,7 +39,11 @@ public class BaseTest {
 
             ChromeOptions options = new ChromeOptions();
             // Add headless mode argument
-            options.addArguments("--headless");
+            //options.addArguments("--headless");
+            options.addArguments("--headless=new"); // Newer, less detectable headless mode
+            options.addArguments("--disable-blink-features=AutomationControlled"); // Prevents bot detection
+            options.addArguments("--window-size=1920,1080"); // Mimics a real screen
+
             // Disable GPU to prevent issues in headless mode
             options.addArguments("--disable-gpu");
             options.addArguments("--disable-dev-shm-usage"); // Fix for low memory issues in Docker
