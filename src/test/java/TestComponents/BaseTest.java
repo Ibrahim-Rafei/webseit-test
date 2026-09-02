@@ -90,7 +90,6 @@ public class BaseTest {
 
         driver = initializeDriver();
         landingPage = new LandingPage(driver);
-        landingPage.goTOLandingPage();
         return landingPage ;
 
     }

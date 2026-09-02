@@ -1,10 +1,6 @@
 package pageobject;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import reuseable.AbstractClass;
@@ -32,18 +28,6 @@ public class LandingPage extends AbstractClass {
 
     public void testUrl(String data) {
         String normalizedUrl = normalizeUrl(data);
-        try {
-            driver.get(normalizedUrl);
-        } catch (TimeoutException e) {
-            // Stop outstanding resources so WebDriver can continue with the next data row.
-            try {
-                ((JavascriptExecutor) driver).executeScript("window.stop();");
-            } catch (RuntimeException ignored) {
-                // Preserve the useful page-load timeout as the test failure.
-            }
-            Assert.fail(normalizedUrl + " exceeded the 15-second page-load timeout", e);
-        }
-        WebElement body = driver.findElement(By.tagName("body"));
         HttpURLConnection connection = null;
 
         try {
@@ -55,15 +39,15 @@ public class LandingPage extends AbstractClass {
             connection.connect();
 
             int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                Assert.assertFalse(driver.getTitle().contains("404")
-                                || driver.getTitle().isEmpty()
-                                || body.getText().contains("404"),
-                        normalizedUrl + " is returning a 404 error.\n");
-                System.out.println(normalizedUrl + " is working. Status code: " + responseCode);
-            } else {
-                Assert.fail(normalizedUrl + " is not working. Status code: " + responseCode + "\n");
-            }
+            URL finalUrl = connection.getURL();
+
+            Assert.assertEquals(finalUrl.getProtocol(), "https",
+                    normalizedUrl + " redirected to a non-HTTPS URL: " + finalUrl);
+            Assert.assertTrue(responseCode >= 200 && responseCode < 400,
+                    normalizedUrl + " is not working. Status code: " + responseCode);
+
+            System.out.println(normalizedUrl + " is working over HTTPS. Status code: "
+                    + responseCode + ", final URL: " + finalUrl);
         } catch (SSLHandshakeException e) {
             Assert.fail(normalizedUrl + " SSL certificate not working", e);
         } catch (IOException e) {
