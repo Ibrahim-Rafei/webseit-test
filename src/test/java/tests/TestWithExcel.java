@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 public class TestWithExcel extends BaseTest {
 
-    @Test(dataProvider = "getData", retryAnalyzer = Retry.class)
+    @Test(dataProvider = "getData", retryAnalyzer = Retry.class, timeOut = 20000)
     public void maintest(String input) throws IOException {
         landingPage.testUrl(input);
     }

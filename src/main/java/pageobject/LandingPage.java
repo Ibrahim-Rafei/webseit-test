@@ -37,6 +37,7 @@ public class LandingPage extends AbstractClass {
 
     public void testUrl(String data) {
         String normalizedUrl = normalizeUrl(data);
+        System.out.println("Checking: " + normalizedUrl);
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(normalizedUrl))
                     .timeout(REQUEST_TIMEOUT)
