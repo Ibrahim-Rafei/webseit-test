@@ -5,15 +5,24 @@ import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import reuseable.AbstractClass;
 
-import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.IDN;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 
 public class LandingPage extends AbstractClass {
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(15);
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(REQUEST_TIMEOUT)
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+
     WebDriver driver;
 
     public LandingPage(WebDriver driver) {
@@ -28,34 +37,31 @@ public class LandingPage extends AbstractClass {
 
     public void testUrl(String data) {
         String normalizedUrl = normalizeUrl(data);
-        HttpURLConnection connection = null;
-
         try {
-            connection = (HttpURLConnection) new URL(normalizedUrl).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(10000);
-            connection.setInstanceFollowRedirects(true);
-            connection.connect();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(normalizedUrl))
+                    .timeout(REQUEST_TIMEOUT)
+                    .header("User-Agent", "Mozilla/5.0 WebsiteHealthCheck/1.0")
+                    .GET()
+                    .build();
+            HttpResponse<Void> response = HTTP_CLIENT.send(
+                    request, HttpResponse.BodyHandlers.discarding());
+            int responseCode = response.statusCode();
+            URI finalUrl = response.uri();
 
-            int responseCode = connection.getResponseCode();
-            URL finalUrl = connection.getURL();
-
-            Assert.assertEquals(finalUrl.getProtocol(), "https",
+            Assert.assertEquals(finalUrl.getScheme(), "https",
                     normalizedUrl + " redirected to a non-HTTPS URL: " + finalUrl);
             Assert.assertTrue(responseCode >= 200 && responseCode < 400,
                     normalizedUrl + " is not working. Status code: " + responseCode);
 
             System.out.println(normalizedUrl + " is working over HTTPS. Status code: "
                     + responseCode + ", final URL: " + finalUrl);
-        } catch (SSLHandshakeException e) {
-            Assert.fail(normalizedUrl + " SSL certificate not working", e);
+        } catch (HttpTimeoutException e) {
+            Assert.fail(normalizedUrl + " exceeded the 15-second HTTP timeout", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Assert.fail(normalizedUrl + " check was interrupted", e);
         } catch (IOException e) {
             Assert.fail(normalizedUrl + " could not be reached: " + e.getMessage(), e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
     }
 
