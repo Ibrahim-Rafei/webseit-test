@@ -3,6 +3,8 @@ package pageobject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import reuseable.AbstractClass;
@@ -30,7 +32,17 @@ public class LandingPage extends AbstractClass {
 
     public void testUrl(String data) {
         String normalizedUrl = normalizeUrl(data);
-        driver.get(normalizedUrl);
+        try {
+            driver.get(normalizedUrl);
+        } catch (TimeoutException e) {
+            // Stop outstanding resources so WebDriver can continue with the next data row.
+            try {
+                ((JavascriptExecutor) driver).executeScript("window.stop();");
+            } catch (RuntimeException ignored) {
+                // Preserve the useful page-load timeout as the test failure.
+            }
+            Assert.fail(normalizedUrl + " exceeded the 15-second page-load timeout", e);
+        }
         WebElement body = driver.findElement(By.tagName("body"));
         HttpURLConnection connection = null;
 

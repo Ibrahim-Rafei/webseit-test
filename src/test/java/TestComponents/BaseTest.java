@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -38,6 +39,7 @@ public class BaseTest {
         if (browserName.contains("chrome")) {
 
             ChromeOptions options = new ChromeOptions();
+            options.setPageLoadStrategy(PageLoadStrategy.EAGER);
             // Add headless mode argument
             //options.addArguments("--headless");
             options.addArguments("--headless=new"); // Newer, less detectable headless mode
@@ -57,6 +59,7 @@ public class BaseTest {
         } else if (browserName.equalsIgnoreCase("edge")) {
             driver = new EdgeDriver();
         }
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().window().maximize();
         return driver;
@@ -95,7 +98,9 @@ public class BaseTest {
     @AfterClass()
     public void tearDown()
     {
-        driver.close();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
 }
