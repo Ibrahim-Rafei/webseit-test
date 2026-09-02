@@ -10,53 +10,87 @@ import reuseable.AbstractClass;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-
-
-import java.net.MalformedURLException;
+import java.net.IDN;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class LandingPage extends AbstractClass {
-    WebDriver driver ;
-    public LandingPage(WebDriver driver){
+    WebDriver driver;
+
+    public LandingPage(WebDriver driver) {
         super(driver);
-        this.driver = driver ;
-        PageFactory.initElements(driver , this);
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
-    public void goTOLandingPage(){
+
+    public void goTOLandingPage() {
         driver.get("http://nivontec.de/");
     }
-    public  void testUrl(String data) throws IOException {
-        driver.get(data);
-        URL siteURL = new URL(data);
+
+    public void testUrl(String data) {
+        String normalizedUrl = normalizeUrl(data);
+        driver.get(normalizedUrl);
         WebElement body = driver.findElement(By.tagName("body"));
+        HttpURLConnection connection = null;
+
         try {
-            // Attempt to open HTTP connection
-            HttpURLConnection connection = (HttpURLConnection) siteURL.openConnection();
+            connection = (HttpURLConnection) new URL(normalizedUrl).openConnection();
             connection.setRequestMethod("GET");
-            connection.setConnectTimeout(10000); // 10 seconds
-            connection.setReadTimeout(10000); // 10 seconds
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            connection.setInstanceFollowRedirects(true);
             connection.connect();
 
-        int responseCode = connection.getResponseCode();
-        if (responseCode == 200) {
-            Assert.assertFalse(driver.getTitle().contains("404") ||  driver.getTitle().isEmpty()|| body.getText().contains("404"), data + " is returning a 404 error." + "\n");
-            System.out.println(data + " is working. Status code: " + responseCode);
-
-        } else {
-            Assert.fail(data + " is not working. Status code: " + responseCode + "\n");
-        }
-        // Check the page title or any other element to determine if the page loaded correctly
-
-       // Assert.assertFalse(!driver.getCurrentUrl().startsWith("https"), data + "is not SSL Certified");
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                Assert.assertFalse(driver.getTitle().contains("404")
+                                || driver.getTitle().isEmpty()
+                                || body.getText().contains("404"),
+                        normalizedUrl + " is returning a 404 error.\n");
+                System.out.println(normalizedUrl + " is working. Status code: " + responseCode);
+            } else {
+                Assert.fail(normalizedUrl + " is not working. Status code: " + responseCode + "\n");
+            }
         } catch (SSLHandshakeException e) {
-            // Handle SSL-related exceptions (indicating HTTPS was expected)
-            Assert.fail(data + " SSL certificate not working" + "\n");
+            Assert.fail(normalizedUrl + " SSL certificate not working", e);
         } catch (IOException e) {
-            // Handle other IO exceptions
-            e.printStackTrace();
+            Assert.fail(normalizedUrl + " could not be reached: " + e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    /**
+     * Adds a default scheme and converts Unicode domain labels (for example,
+     * "göttingen") to the ASCII/Punycode form required by DNS clients.
+     */
+    static String normalizeUrl(String data) {
+        if (data == null || data.isBlank()) {
+            throw new IllegalArgumentException("URL must not be empty");
         }
 
+        String value = data.trim();
+        if (!value.matches("^[a-zA-Z][a-zA-Z0-9+.-]*://.*$")) {
+            value = "https://" + value;
         }
 
-
+        try {
+            URL url = new URL(value);
+            String asciiHost = IDN.toASCII(url.getHost());
+            return new URI(
+                    url.getProtocol(),
+                    url.getUserInfo(),
+                    asciiHost,
+                    url.getPort(),
+                    url.getPath(),
+                    url.getQuery(),
+                    url.getRef()
+            ).toASCIIString();
+        } catch (IOException | URISyntaxException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid URL in test data: " + data, e);
+        }
+    }
 }
